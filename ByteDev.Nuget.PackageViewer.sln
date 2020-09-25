@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByteDev.Nuget.PackageViewer", "src\ByteDev.Nuget.PackageViewer\ByteDev.Nuget.PackageViewer.csproj", "{7777A5CB-F2D2-4DA6-9524-1187B214DF09}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7777A5CB-F2D2-4DA6-9524-1187B214DF09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7777A5CB-F2D2-4DA6-9524-1187B214DF09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7777A5CB-F2D2-4DA6-9524-1187B214DF09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7777A5CB-F2D2-4DA6-9524-1187B214DF09}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C94D8777-889D-497F-ACA9-B12E77CE6CD8}
+	EndGlobalSection
+EndGlobal
