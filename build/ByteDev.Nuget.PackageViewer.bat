@@ -1,0 +1,1 @@
+C:\Dev\GitHub\ByteDev.Nuget.PackageViewer\src\ByteDev.Nuget.PackageViewer\bin\Release\netcoreapp3.1\win-x64\ByteDev.Nuget.PackageViewer.exe
