@@ -2,59 +2,78 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ByteDev.Cmd;
+using ByteDev.Cmd.Arguments;
 using ByteDev.Nuget.Contract;
-using NuGet.Packaging;
 
 namespace ByteDev.Nuget.PackageViewer
 {
-    class Program
+    internal class Program
     {
+        private static readonly Output Output = new Output();
+
+        private static IList<CmdAllowedArg> _cmdAllowedArgs;
+
         private static async Task Main(string[] args)
         {
-            const string searchTerm = "bytedev";
+            Output.WriteHeader();
 
-            await CheckPackages(searchTerm);
+            _cmdAllowedArgs = CmdAllowedArgsFactory.CreateCmdAllowedArgs();
 
-            // await CheckPackages(new List<string>
-            //  {
-            //      "ByteDev.ArgValidation",
-            //      "ByteDev.Testing.NUnit",
-            //      "ByteDev.Azure.KeyVault"
-            //  });
+            var cmdArgInfo = new CmdArgInfo(args, _cmdAllowedArgs);
+
+            CmdArg searchTermArg = cmdArgInfo.GetArgument('s');
+            CmdArg packageIdCsv = cmdArgInfo.GetArgument('i');
+
+            if (searchTermArg != null)
+            {
+                await SearchAsync(searchTermArg.Value);
+            }
+            else if (packageIdCsv != null)
+            {
+                var packageIds = packageIdCsv.Value.ToCsvList();
+
+                await GetByIdsAsync(packageIds);
+            }
+            else
+            {
+                HandleError("Provide either a search term or CSV list of package IDs argument.");
+            }
         }
 
-        private static async Task CheckPackages(string searchTerm)
+        private static async Task SearchAsync(string searchTerm)
         {
-            var client = new NugetPackageClient();
+            const int takeCount = 50;
 
-            Console.WriteLine($"Searching for: '{searchTerm}'.");
-            Console.WriteLine();
+            Output.WriteLine($"Searching for first {takeCount} for: '{searchTerm}'.");
+            Output.WriteLine();
+
+            var client = new NugetPackageClient();
 
             var packages = await client.SearchAsync(new SearchRequest(searchTerm)
             {
-                Take = 50,
+                Take = takeCount,
                 IncludePreRelease = false
             });
 
             foreach (var sp in packages.OrderBy(p => p.Identity.Id))
             {
-                Console.WriteLine($"{sp.Identity}");
+                Output.WriteLine($"{sp.Identity}");
 
                 var package = await client.GetAsync(sp.Identity);
 
-                foreach (var ds in package.DependencySets)
-                {
-                    WriteDependencySet(ds);
-                }
-
-                Console.WriteLine();
+                Output.WriteDependencies(package);
+                Output.WriteLine();
             }
         }
 
-        private static async Task CheckPackages(IList<string> packageIds)
+        private static async Task GetByIdsAsync(IList<string> packageIds)
         {
-            var client = new NugetPackageClient();
+            Output.WriteLine("Getting packages by ID...");
+            Output.WriteLine();
 
+            var client = new NugetPackageClient();
+            
             var notFoundCount = 0;
 
             foreach (var packageId in packageIds.OrderBy(p => p))
@@ -63,41 +82,26 @@ namespace ByteDev.Nuget.PackageViewer
 
                 if (package == null)
                 {
-                    Console.WriteLine($"{packageId} (not found).");
+                    Output.WritePackageNotFound(packageId);
                     notFoundCount++;
                 }
                 else
                 {
-                    Console.WriteLine($"{packageId}");
-
-                    foreach (var ds in package.DependencySets)
-                    {
-                        WriteDependencySet(ds);
-                    }
+                    Output.WriteLine($"{packageId}");
+                    Output.WriteDependencies(package);
                 }
 
-                Console.WriteLine();
+                Output.WriteLine();
             }
 
-            WriteFooter(packageIds, notFoundCount);
+            Output.WriteFooter(packageIds, notFoundCount);
         }
 
-        private static void WriteDependencySet(PackageDependencyGroup ds)
+        private static void HandleError(string errorMessage)
         {
-            Console.WriteLine($"-> {ds.TargetFramework}");
-
-            foreach (var dsPackage in ds.Packages)
-            {
-                Console.WriteLine($"---> {dsPackage}");
-            }
-        }
-
-        private static void WriteFooter(IList<string> packageIds, int notFoundCount)
-        {
-            Console.WriteLine($"Found: {packageIds.Count - notFoundCount}");
-            Console.WriteLine($"Not found: {notFoundCount}");
-            Console.WriteLine();
-            Console.WriteLine("Done.");
+            Output.WriteError(errorMessage);
+            Output.WriteLine(_cmdAllowedArgs.HelpText());
+            Environment.Exit(0);
         }
     }
 }

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ByteDev.Nuget.PackageViewer": {
+      "commandName": "Project",
+      "commandLineArgs": "-i ByteDev.DotNet,ByteDev.Xml,ByteDev.Junk"
+    }
+  }
+}
